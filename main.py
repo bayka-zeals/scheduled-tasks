@@ -14,8 +14,8 @@ account_sid = os.getenv("ACCOUNT_SID")
 auth_token = os.getenv("AUTH_TOKEN")
 
 parameters = {
-    "lat": 41.878113,
-    "lon": -87.629799,
+    "lat": 35.689487,
+    "lon": 139.691711,
     "appid": API_KEY,
     "ctn": 4
 }
@@ -31,11 +31,19 @@ for item in range(len(weather_data["list"])):
         will_rain = True
 
 
+client = Client(account_sid, auth_token)
 if will_rain:
-    client = Client(account_sid, auth_token)
     message = client.messages.create(
         body= "It's going to rain today. Bring ☔️.",
         from_="whatsapp:+14155238886",
         to="whatsapp:+818061792832"
     )
     print(message.status)
+else:
+    message = client.messages.create(
+        body= "Today is okay! No need umbrella.",
+        from_="whatsapp:+14155238886",
+        to="whatsapp:+818061792832"
+    )
+    print(message.status)
+    
