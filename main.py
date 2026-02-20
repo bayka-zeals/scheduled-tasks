@@ -8,9 +8,6 @@
 import requests
 import os
 from twilio.rest import Client
-from dotenv import load_dotenv
-
-load_dotenv()
 
 API_KEY = os.getenv("API_KEY")
 account_sid = os.getenv("ACCOUNT_SID")
