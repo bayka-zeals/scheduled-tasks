@@ -5,34 +5,40 @@
 # 4. Update birthdays.csv to contain today's month and day.
 # See the solution video in the 100 Days of Python Course for explainations.
 
-
-from datetime import datetime
-import pandas
-import random
-import smtplib
+import requests
 import os
+from twilio.rest import Client
+from dotenv import load_dotenv
 
-# import os and use it to get the Github repository secrets
-MY_EMAIL = os.environ.get("MY_EMAIL")
-MY_PASSWORD = os.environ.get("MY_PASSWORD")
+load_dotenv()
 
-today = datetime.now()
-today_tuple = (today.month, today.day)
+API_KEY = os.getenv("API_KEY")
+account_sid = os.getenv("ACCOUNT_SID")
+auth_token = os.getenv("AUTH_TOKEN")
 
-data = pandas.read_csv("birthdays.csv")
-birthdays_dict = {(data_row["month"], data_row["day"])                  : data_row for (index, data_row) in data.iterrows()}
-if today_tuple in birthdays_dict:
-    birthday_person = birthdays_dict[today_tuple]
-    file_path = f"letter_templates/letter_{random.randint(1, 3)}.txt"
-    with open(file_path) as letter_file:
-        contents = letter_file.read()
-        contents = contents.replace("[NAME]", birthday_person["name"])
+parameters = {
+    "lat": 41.878113,
+    "lon": -87.629799,
+    "appid": API_KEY,
+    "ctn": 4
+}
 
-    with smtplib.SMTP("YOUR EMAIL PROVIDER SMTP SERVER ADDRESS") as connection:
-        connection.starttls()
-        connection.login(MY_EMAIL, MY_PASSWORD)
-        connection.sendmail(
-            from_addr=MY_EMAIL,
-            to_addrs=birthday_person["email"],
-            msg=f"Subject:Happy Birthday!\n\n{contents}"
-        )
+url = "https://api.openweathermap.org/data/2.5/forecast"
+
+response = requests.get(url, params=parameters)
+weather_data = response.json()
+will_rain = False
+
+for item in range(len(weather_data["list"])):
+    if int(weather_data["list"][item]["weather"][0]["id"]) < 700:
+        will_rain = True
+
+
+if will_rain:
+    client = Client(account_sid, auth_token)
+    message = client.messages.create(
+        body= "It's going to rain today. Bring ☔️.",
+        from_="whatsapp:+14155238886",
+        to="whatsapp:+818061792832"
+    )
+    print(message.status)
